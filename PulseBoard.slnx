@@ -1,0 +1,35 @@
+<Solution>
+  <Folder Name="/api/">
+    <Project Path="api/src/PulseBoard.Api/PulseBoard.Api.csproj" />
+    <Project Path="api/tests/PulseBoard.Api.Tests/PulseBoard.Api.Tests.csproj" />
+  </Folder>
+  <Folder Name="/aspire/">
+    <Project Path="aspire/PulseBoard.AppHost/PulseBoard.AppHost.csproj" />
+    <Project Path="aspire/PulseBoard.ServiceDefaults/PulseBoard.ServiceDefaults.csproj" />
+  </Folder>
+  <Folder Name="/modules/" />
+  <Folder Name="/modules/Incidents/">
+    <Project Path="modules/Incidents/src/PulseBoard.Incidents.Application/PulseBoard.Incidents.Application.csproj" />
+    <Project Path="modules/Incidents/src/PulseBoard.Incidents.Contracts/PulseBoard.Incidents.Contracts.csproj" />
+    <Project Path="modules/Incidents/src/PulseBoard.Incidents.Domain/PulseBoard.Incidents.Domain.csproj" />
+    <Project Path="modules/Incidents/src/PulseBoard.Incidents.Infrastructure/PulseBoard.Incidents.Infrastructure.csproj" />
+    <Project Path="modules/Incidents/tests/PulseBoard.Incidents.Tests/PulseBoard.Incidents.Tests.csproj" />
+  </Folder>
+  <Folder Name="/modules/Monitoring/">
+    <Project Path="modules/Monitoring/src/PulseBoard.Monitoring.Application/PulseBoard.Monitoring.Application.csproj" />
+    <Project Path="modules/Monitoring/src/PulseBoard.Monitoring.Contracts/PulseBoard.Monitoring.Contracts.csproj" />
+    <Project Path="modules/Monitoring/src/PulseBoard.Monitoring.Domain/PulseBoard.Monitoring.Domain.csproj" />
+    <Project Path="modules/Monitoring/src/PulseBoard.Monitoring.Infrastructure/PulseBoard.Monitoring.Infrastructure.csproj" />
+    <Project Path="modules/Monitoring/tests/PulseBoard.Monitoring.Tests/PulseBoard.Monitoring.Tests.csproj" />
+  </Folder>
+  <Folder Name="/pipeline/">
+    <Project Path="pipeline/src/PulseBoard.Functions/PulseBoard.Functions.csproj" />
+    <Project Path="pipeline/tests/PulseBoard.Functions.Tests/PulseBoard.Functions.Tests.csproj" />
+  </Folder>
+  <Folder Name="/shared/">
+    <Project Path="shared/src/PulseBoard.SharedKernel/PulseBoard.SharedKernel.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/PulseBoard.Architecture.Tests/PulseBoard.Architecture.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,9 @@
+<Project>
+  <!-- Settings shared by every .NET project in the repo. -->
+  <PropertyGroup>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <!-- Turn on once the template code is cleaned up:
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors> -->
+  </PropertyGroup>
+</Project>

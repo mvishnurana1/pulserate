@@ -1,0 +1,21 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\modules\Monitoring\src\PulseBoard.Monitoring.Application\PulseBoard.Monitoring.Application.csproj" />
+    <ProjectReference Include="..\..\..\modules\Monitoring\src\PulseBoard.Monitoring.Infrastructure\PulseBoard.Monitoring.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\modules\Incidents\src\PulseBoard.Incidents.Application\PulseBoard.Incidents.Application.csproj" />
+    <ProjectReference Include="..\..\..\modules\Incidents\src\PulseBoard.Incidents.Infrastructure\PulseBoard.Incidents.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\..\aspire\PulseBoard.ServiceDefaults\PulseBoard.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+</Project>

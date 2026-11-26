@@ -1,0 +1,36 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+    <IsPackable>false</IsPackable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="coverlet.collector" Version="6.0.4" />
+    <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
+    <PackageReference Include="NetArchTest.Rules" Version="1.3.2" />
+    <PackageReference Include="xunit" Version="2.9.3" />
+    <PackageReference Include="xunit.runner.visualstudio" Version="3.1.4" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\..\shared\src\PulseBoard.SharedKernel\PulseBoard.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\api\src\PulseBoard.Api\PulseBoard.Api.csproj" />
+    <ProjectReference Include="..\..\pipeline\src\PulseBoard.Functions\PulseBoard.Functions.csproj" />
+    <ProjectReference Include="..\..\modules\Monitoring\src\PulseBoard.Monitoring.Contracts\PulseBoard.Monitoring.Contracts.csproj" />
+    <ProjectReference Include="..\..\modules\Monitoring\src\PulseBoard.Monitoring.Domain\PulseBoard.Monitoring.Domain.csproj" />
+    <ProjectReference Include="..\..\modules\Monitoring\src\PulseBoard.Monitoring.Application\PulseBoard.Monitoring.Application.csproj" />
+    <ProjectReference Include="..\..\modules\Monitoring\src\PulseBoard.Monitoring.Infrastructure\PulseBoard.Monitoring.Infrastructure.csproj" />
+    <ProjectReference Include="..\..\modules\Incidents\src\PulseBoard.Incidents.Contracts\PulseBoard.Incidents.Contracts.csproj" />
+    <ProjectReference Include="..\..\modules\Incidents\src\PulseBoard.Incidents.Domain\PulseBoard.Incidents.Domain.csproj" />
+    <ProjectReference Include="..\..\modules\Incidents\src\PulseBoard.Incidents.Application\PulseBoard.Incidents.Application.csproj" />
+    <ProjectReference Include="..\..\modules\Incidents\src\PulseBoard.Incidents.Infrastructure\PulseBoard.Incidents.Infrastructure.csproj" />
+  </ItemGroup>
+
+</Project>

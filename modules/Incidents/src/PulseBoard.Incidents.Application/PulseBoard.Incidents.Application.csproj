@@ -1,0 +1,16 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <ItemGroup>
+    <ProjectReference Include="..\PulseBoard.Incidents.Domain\PulseBoard.Incidents.Domain.csproj" />
+    <ProjectReference Include="..\PulseBoard.Incidents.Contracts\PulseBoard.Incidents.Contracts.csproj" />
+    <ProjectReference Include="..\..\..\..\shared\src\PulseBoard.SharedKernel\PulseBoard.SharedKernel.csproj" />
+    <ProjectReference Include="..\..\..\Monitoring\src\PulseBoard.Monitoring.Contracts\PulseBoard.Monitoring.Contracts.csproj" />
+  </ItemGroup>
+
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+</Project>
