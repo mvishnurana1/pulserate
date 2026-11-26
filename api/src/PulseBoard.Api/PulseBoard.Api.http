@@ -1,6 +1,54 @@
-@PulseBoard.Api_HostAddress = http://localhost:5241
+@api = http://localhost:5241
 
-GET {{PulseBoard.Api_HostAddress}}/weatherforecast/
+### List checks
+GET {{api}}/api/checks
 Accept: application/json
 
+### Create a check
+# @name create
+POST {{api}}/api/checks
+Content-Type: application/json
+
+{
+  "name": "Example",
+  "url": "https://example.com",
+  "intervalSeconds": 60,
+  "failureThreshold": 3
+}
+
+### Create an invalid check (expect 400 with code "Check.InvalidUrl")
+POST {{api}}/api/checks
+Content-Type: application/json
+
+{
+  "name": "Broken",
+  "url": "ftp://example.com"
+}
+
+### Get the check created above
+@checkId = {{create.response.body.$.id}}
+GET {{api}}/api/checks/{{checkId}}
+Accept: application/json
+
+### Update it
+PUT {{api}}/api/checks/{{checkId}}
+Content-Type: application/json
+
+{
+  "name": "Example (every 5 min)",
+  "url": "https://example.com",
+  "intervalSeconds": 300,
+  "failureThreshold": 2
+}
+
+### Pause, then pause again (expect 409 "Check.AlreadyPaused")
+POST {{api}}/api/checks/{{checkId}}/pause
+
 ###
+POST {{api}}/api/checks/{{checkId}}/resume
+
+### History (empty until the Functions slice records results)
+GET {{api}}/api/checks/{{checkId}}/results?take=20
+
+### Delete
+DELETE {{api}}/api/checks/{{checkId}}

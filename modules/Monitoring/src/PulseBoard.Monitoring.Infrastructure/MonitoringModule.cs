@@ -1,0 +1,51 @@
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Migrations;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
+using Microsoft.Extensions.Hosting;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
+using PulseBoard.Monitoring.Application;
+using PulseBoard.Monitoring.Application.Abstractions;
+using PulseBoard.Monitoring.Infrastructure.Persistence;
+
+namespace PulseBoard.Monitoring.Infrastructure;
+
+/// <summary>
+/// The single entry point a host (API or Functions) uses to plug in the Monitoring module.
+/// </summary>
+public static class MonitoringModule
+{
+    /// <summary>Connection string name. Matches the database resource in the Aspire AppHost.</summary>
+    public const string ConnectionName = "pulseboard-db";
+
+    public static IHostApplicationBuilder AddMonitoringModule(this IHostApplicationBuilder builder)
+    {
+        builder.Services.TryAddSingleton(TimeProvider.System);
+        builder.Services.AddMonitoringApplication();
+
+        builder.Services.AddDbContextPool<MonitoringDbContext>(options => options.UseNpgsql(
+            builder.Configuration.GetConnectionString(ConnectionName)
+                ?? throw new InvalidOperationException($"Connection string '{ConnectionName}' is missing."),
+            ConfigureNpgsql));
+
+        // Adds Aspire's health check, connection retries and OpenTelemetry tracing for this context.
+        builder.EnrichNpgsqlDbContext<MonitoringDbContext>();
+
+        builder.Services.AddScoped<IMonitoringDbContext>(sp => sp.GetRequiredService<MonitoringDbContext>());
+
+        return builder;
+    }
+
+    /// <summary>Applies pending migrations. Development only; production runs migrations as a deploy step.</summary>
+    public static async Task MigrateMonitoringDatabaseAsync(this IServiceProvider services, CancellationToken cancellationToken = default)
+    {
+        await using var scope = services.CreateAsyncScope();
+        var db = scope.ServiceProvider.GetRequiredService<MonitoringDbContext>();
+        await db.Database.MigrateAsync(cancellationToken);
+    }
+
+    // Each module keeps its migration history in its own schema, so modules can migrate independently.
+    internal static void ConfigureNpgsql(NpgsqlDbContextOptionsBuilder npgsql) =>
+        npgsql.MigrationsHistoryTable(HistoryRepository.DefaultTableName, MonitoringDbContext.Schema);
+}

@@ -18,4 +18,19 @@ Azure Functions for scheduled checks, Angular frontend, orchestrated with Aspire
 | `infra/`    | Bicep / docker-compose                                |
 
 ## Run locally
-TODO
+Prerequisites: .NET 10 SDK, Docker Desktop (or Podman), Node.js LTS.
+
+```powershell
+dotnet tool restore
+dotnet run --project aspire/PulseBoard.AppHost
+```
+
+The Aspire dashboard opens with the API, Postgres and pgAdmin. API docs are at `/scalar` on the API.
+
+## Tests
+```powershell
+dotnet test PulseBoard.slnx
+```
+
+## Design decisions
+See [docs/adr](docs/adr).

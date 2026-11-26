@@ -8,6 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.15" />
+    <PackageReference Include="Scalar.AspNetCore" Version="2.21.0" />
   </ItemGroup>
 
   <ItemGroup>
@@ -16,6 +17,13 @@
     <ProjectReference Include="..\..\..\modules\Incidents\src\PulseBoard.Incidents.Application\PulseBoard.Incidents.Application.csproj" />
     <ProjectReference Include="..\..\..\modules\Incidents\src\PulseBoard.Incidents.Infrastructure\PulseBoard.Incidents.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\aspire\PulseBoard.ServiceDefaults\PulseBoard.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.*">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>
