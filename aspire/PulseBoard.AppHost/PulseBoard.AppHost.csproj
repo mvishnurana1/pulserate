@@ -5,12 +5,14 @@
     <TargetFramework>net10.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <!-- Aspire marks APIs obsolete quickly between releases; keep those visible as warnings. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);CS0618</WarningsNotAsErrors>
     <UserSecretsId>325893c0-388e-4cea-b3e5-e20dd0735e7a</UserSecretsId>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.AppHost" Version="17.0.0" />
-    <PackageReference Include="Aspire.Hosting.Dotnet" Version="17.0.0" />
+    <PackageReference Include="Aspire.Hosting.AppHost" />
+    <PackageReference Include="Aspire.Hosting.Dotnet" />
   </ItemGroup>
 
   <ItemGroup>
@@ -19,13 +21,13 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.PostgreSQL" Version="17.0.0" />
+    <PackageReference Include="Aspire.Hosting.PostgreSQL" />
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Aspire.Hosting.Azure.Storage" Version="17.0.0" />
-    <PackageReference Include="Aspire.Hosting.Azure.Functions" Version="17.0.0" />
-    <PackageReference Include="Aspire.Hosting.JavaScript" Version="17.0.0" />
+    <PackageReference Include="Aspire.Hosting.Azure.Storage" />
+    <PackageReference Include="Aspire.Hosting.Azure.Functions" />
+    <PackageReference Include="Aspire.Hosting.JavaScript" />
   </ItemGroup>
 
 </Project>

@@ -1,5 +1,7 @@
 # PulseBoard
 
+[![CI](https://github.com/mvishnurana1/pulserate/actions/workflows/ci.yml/badge.svg)](https://github.com/mvishnurana1/pulserate/actions/workflows/ci.yml)
+
 A small uptime and status monitor: ASP.NET Core (.NET 10) modular monolith,
 Azure Functions for scheduled checks, Angular frontend, orchestrated with Aspire.
 
@@ -49,9 +51,24 @@ dotnet ef migrations add <Name> --context IncidentsDbContext -p modules/Incident
 
 ## Tests
 ```powershell
-dotnet test PulseBoard.slnx
+dotnet test PulseBoard.slnx              # needs Docker: integration tests start a real Postgres
 cd webapp; npm test -- --watch=false
 ```
+
+| Suite | What it covers |
+|-------|----------------|
+| `modules/*/tests` | Domain rules (thresholds, events, scheduling, incidents) and the SSRF address policy |
+| `api/tests` | The real API and both modules against Postgres in Docker (Testcontainers): HTTP contracts, problem details, the outbox-to-incident flow, idempotency, scheduling |
+| `tests/PulseBoard.Architecture.Tests` | Module and layer boundaries |
+| `webapp` | Client state, live updates, formatting and stats (Vitest) |
+
+CI runs all of it on every push and pull request, with warnings treated as errors.
+
+## Security notes
+- **SSRF:** the prober refuses private, loopback, link-local and reserved addresses at connection time,
+  redirects included ([ADR 4](docs/adr/0004-ssrf-protection.md)). To monitor internal services on purpose, set
+  `Monitoring__Prober__AllowPrivateNetworks=true` on the Functions app.
+- **Authentication** is not implemented yet.
 
 ## Design decisions
 See [docs/adr](docs/adr).

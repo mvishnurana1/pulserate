@@ -6,6 +6,7 @@ namespace PulseBoard.Monitoring.Infrastructure.Probing;
 /// <summary>
 /// Probes an endpoint with a single GET. Deliberately has no retry policy: retrying would hide
 /// outages and inflate response times. The check's failure threshold is what absorbs one-off blips.
+/// Connections go through <see cref="SafeSocketConnector"/>, which blocks private and reserved addresses.
 /// </summary>
 public sealed class HttpEndpointProber(HttpClient httpClient, TimeProvider clock) : IEndpointProber
 {
@@ -35,7 +36,22 @@ public sealed class HttpEndpointProber(HttpClient httpClient, TimeProvider clock
         }
         catch (HttpRequestException ex)
         {
-            return CheckOutcome.Failure(ex.Message, clock.GetElapsedTime(started));
+            // HttpClient wraps errors from the connect callback, so surface the "blocked" reason if that's what happened.
+            var message = FindBlocked(ex)?.Message ?? ex.Message;
+            return CheckOutcome.Failure(message, clock.GetElapsedTime(started));
         }
+    }
+
+    private static BlockedAddressException? FindBlocked(Exception? exception)
+    {
+        for (; exception is not null; exception = exception.InnerException)
+        {
+            if (exception is BlockedAddressException blocked)
+            {
+                return blocked;
+            }
+        }
+
+        return null;
     }
 }

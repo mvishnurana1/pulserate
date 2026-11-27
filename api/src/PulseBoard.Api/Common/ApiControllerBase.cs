@@ -3,8 +3,9 @@ using PulseBoard.SharedKernel;
 
 namespace PulseBoard.Api.Common;
 
+// No [Produces] attribute: it would force problem responses to application/json instead of
+// application/problem+json (RFC 9457). Successful responses are JSON by default anyway.
 [ApiController]
-[Produces("application/json")]
 public abstract class ApiControllerBase : ControllerBase
 {
     /// <summary>

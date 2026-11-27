@@ -21,6 +21,9 @@ public static class MonitoringModule
     /// <summary>Connection string name. Matches the database resource in the Aspire AppHost.</summary>
     public const string ConnectionName = "pulseboard-db";
 
+    /// <summary>Configuration switch (env var <c>Monitoring__Prober__AllowPrivateNetworks</c>). Off by default.</summary>
+    public const string AllowPrivateNetworksKey = "Monitoring:Prober:AllowPrivateNetworks";
+
     public static IHostApplicationBuilder AddMonitoringModule(this IHostApplicationBuilder builder)
     {
         builder.Services.TryAddSingleton(TimeProvider.System);
@@ -36,14 +39,26 @@ public static class MonitoringModule
 
         builder.Services.AddScoped<IMonitoringDbContext>(sp => sp.GetRequiredService<MonitoringDbContext>());
 
-        // The prober gets its own HttpClient with no resilience handler. Aspire's ServiceDefaults adds retries
-        // to every client by default, which would hide outages and skew response times.
+        // Private networks are blocked unless explicitly allowed, e.g. to monitor services on your own network.
+        var allowPrivateNetworks = builder.Configuration.GetValue<bool>(AllowPrivateNetworksKey);
+
+        // The prober gets its own HttpClient:
+        // - no resilience handler: ServiceDefaults adds retries to every client, which would hide outages;
+        // - a connect callback that refuses private and reserved addresses (SSRF protection).
 #pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers may be marked experimental.
         builder.Services
             .AddHttpClient<IEndpointProber, HttpEndpointProber>(client =>
             {
                 client.Timeout = HttpEndpointProber.Timeout;
                 client.DefaultRequestHeaders.UserAgent.ParseAdd("PulseBoard/1.0 (+uptime monitor)");
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new SocketsHttpHandler
+            {
+                ConnectCallback = (context, cancellationToken) =>
+                    SafeSocketConnector.ConnectAsync(context, allowPrivateNetworks, cancellationToken),
+                AllowAutoRedirect = true,
+                MaxAutomaticRedirections = 5,
+                PooledConnectionLifetime = TimeSpan.FromMinutes(2),
             })
             .RemoveAllResilienceHandlers();
 #pragma warning restore EXTEXP0001

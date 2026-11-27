@@ -3,7 +3,12 @@
   <PropertyGroup>
     <Nullable>enable</Nullable>
     <ImplicitUsings>enable</ImplicitUsings>
-    <!-- Turn on once the template code is cleaned up:
-    <TreatWarningsAsErrors>true</TreatWarningsAsErrors> -->
+  </PropertyGroup>
+
+  <!-- The Functions SDK's generated WorkerExtensions project (under obj/) isn't our code, so it's excluded. -->
+  <PropertyGroup Condition="'$(MSBuildProjectName)' != 'WorkerExtensions'">
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+    <!-- Vulnerability advisories stay visible as warnings instead of breaking every build the day one is published. -->
+    <WarningsNotAsErrors>$(WarningsNotAsErrors);NU1901;NU1902;NU1903;NU1904</WarningsNotAsErrors>
   </PropertyGroup>
 </Project>
