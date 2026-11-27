@@ -1,0 +1,62 @@
+<header class="page-header">
+  <div>
+    <a class="back-link" [routerLink]="id() ? ['/checks', id()] : ['/']">← Back</a>
+    <h1>{{ id() ? 'Edit check' : 'Add a check' }}</h1>
+  </div>
+</header>
+
+@if (loading()) {
+  <p class="muted">Loading…</p>
+} @else {
+  <form class="card form" [formGroup]="form" (ngSubmit)="save()" novalidate>
+    @if (serverError(); as error) {
+      <div class="alert alert--danger" role="alert">{{ error }}</div>
+    }
+
+    <div class="field">
+      <label for="name">Name</label>
+      <input id="name" type="text" formControlName="name" placeholder="Marketing site" autocomplete="off" />
+      @if (showError('name')) {
+        <span class="field__error">Enter a name of up to 100 characters.</span>
+      }
+    </div>
+
+    <div class="field">
+      <label for="url">URL</label>
+      <input id="url" type="url" formControlName="url" placeholder="https://example.com/health" autocomplete="off" />
+      <span class="field__hint">PulseBoard sends a GET request. Any 2xx response counts as up.</span>
+      @if (showError('url')) {
+        <span class="field__error">Enter a full http:// or https:// address.</span>
+      }
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="interval">Check</label>
+        <select id="interval" formControlName="intervalSeconds">
+          @for (option of intervals; track option.seconds) {
+            <option [ngValue]="option.seconds">{{ option.label }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="field">
+        <label for="threshold">Mark as down after</label>
+        <div class="input-suffix">
+          <input id="threshold" type="number" min="1" max="10" formControlName="failureThreshold" />
+          <span>failures in a row</span>
+        </div>
+        @if (showError('failureThreshold')) {
+          <span class="field__error">Choose between 1 and 10.</span>
+        }
+      </div>
+    </div>
+
+    <div class="form__actions">
+      <a class="button" [routerLink]="id() ? ['/checks', id()] : ['/']">Cancel</a>
+      <button class="button button--primary" type="submit" [disabled]="saving()">
+        {{ saving() ? 'Saving…' : id() ? 'Save changes' : 'Add check' }}
+      </button>
+    </div>
+  </form>
+}

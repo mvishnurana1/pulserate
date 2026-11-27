@@ -17,19 +17,40 @@ Azure Functions for scheduled checks, Angular frontend, orchestrated with Aspire
 | `http/`     | Bruno API collection                                  |
 | `infra/`    | Bicep / docker-compose                                |
 
+## How it works
+1. **Scheduling:** every 15 seconds a timer function claims the checks that are due and queues one
+   message per check (Azure Storage queue).
+2. **Checking:** a queue-triggered function calls the endpoint once (10 s timeout, no retries) and records
+   the result. The check flips to *Down* only after its failure threshold is reached.
+3. **Events:** the result, status change and domain events are saved in one transaction, with the events
+   written to an outbox table ([ADR 3](docs/adr/0003-transactional-outbox.md)).
+4. **Reacting:** the API publishes the outbox in-process. The Incidents module opens or resolves incidents,
+   and a SignalR hub pushes live updates to the Angular dashboard.
+
 ## Run locally
-Prerequisites: .NET 10 SDK, Docker Desktop (or Podman), Node.js LTS.
+Prerequisites: .NET 10 SDK, Docker Desktop (or Podman), Node.js LTS, Azure Functions Core Tools v4.
 
 ```powershell
 dotnet tool restore
+cd webapp; npm install; cd ..
 dotnet run --project aspire/PulseBoard.AppHost
 ```
 
-The Aspire dashboard opens with the API, Postgres and pgAdmin. API docs are at `/scalar` on the API.
+The Aspire dashboard starts Postgres, pgAdmin, Azurite, the API, the Functions app and the Angular dev
+server. Open the dashboard at http://localhost:4200, and the API docs at `/scalar` on the API.
+
+### Migrations
+Each module has its own `DbContext`, schema and migration history:
+
+```powershell
+dotnet ef migrations add <Name> --context MonitoringDbContext -p modules/Monitoring/src/PulseBoard.Monitoring.Infrastructure -s api/src/PulseBoard.Api -o Persistence/Migrations
+dotnet ef migrations add <Name> --context IncidentsDbContext -p modules/Incidents/src/PulseBoard.Incidents.Infrastructure -s api/src/PulseBoard.Api -o Persistence/Migrations
+```
 
 ## Tests
 ```powershell
 dotnet test PulseBoard.slnx
+cd webapp; npm test -- --watch=false
 ```
 
 ## Design decisions

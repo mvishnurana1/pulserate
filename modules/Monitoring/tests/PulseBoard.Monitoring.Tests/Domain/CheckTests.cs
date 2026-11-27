@@ -73,7 +73,7 @@ public sealed class CheckTests
         check.RecordResult(Failed(), Now.AddMinutes(1));
 
         Assert.NotEqual(CheckStatus.Down, check.Status);
-        Assert.Empty(check.DomainEvents);
+        Assert.Empty(check.DomainEvents.OfType<CheckWentDown>());
 
         check.RecordResult(Failed(), Now.AddMinutes(2));
 
@@ -92,7 +92,7 @@ public sealed class CheckTests
         check.RecordResult(Failed(), Now.AddMinutes(1));
         check.RecordResult(Failed(), Now.AddMinutes(2));
 
-        Assert.Single(check.DomainEvents);
+        Assert.Single(check.DomainEvents.OfType<CheckWentDown>());
         Assert.Equal(3, check.ConsecutiveFailures);
     }
 
@@ -111,7 +111,7 @@ public sealed class CheckTests
     }
 
     [Fact]
-    public void Success_while_up_raises_no_events()
+    public void Success_while_up_raises_no_status_change_events()
     {
         var check = CreateCheck();
 
@@ -119,7 +119,44 @@ public sealed class CheckTests
         check.RecordResult(Succeeded(), Now.AddMinutes(1));
 
         Assert.Equal(CheckStatus.Up, check.Status);
-        Assert.Empty(check.DomainEvents);
+        Assert.Empty(check.DomainEvents.OfType<CheckWentDown>());
+        Assert.Empty(check.DomainEvents.OfType<CheckRecovered>());
+    }
+
+    [Fact]
+    public void Every_result_raises_a_result_recorded_event_before_any_status_change()
+    {
+        var check = CreateCheck(failureThreshold: 1);
+
+        var result = check.RecordResult(Failed(), Now);
+
+        var events = check.DomainEvents.ToList();
+        var recorded = Assert.IsType<CheckResultRecorded>(events[0]);
+        Assert.IsType<CheckWentDown>(events[1]);
+        Assert.Equal(result.Value.Id, recorded.ResultId);
+        Assert.False(recorded.IsSuccess);
+        Assert.Equal(503, recorded.StatusCode);
+    }
+
+    [Fact]
+    public void Scheduling_claims_the_check_for_one_interval()
+    {
+        var check = CreateCheck();
+        var scheduledAt = Now.AddSeconds(3);
+
+        check.MarkScheduled(scheduledAt);
+
+        Assert.False(check.IsDue(scheduledAt));
+        Assert.True(check.IsDue(scheduledAt + OneMinute));
+    }
+
+    [Fact]
+    public void Paused_checks_cannot_be_scheduled()
+    {
+        var check = CreateCheck();
+        check.Pause();
+
+        Assert.Equal(CheckErrors.IsPaused, check.MarkScheduled(Now).Error);
     }
 
     [Fact]

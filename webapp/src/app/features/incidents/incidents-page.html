@@ -1,0 +1,82 @@
+<header class="page-header">
+  <div>
+    <h1>Incidents</h1>
+    <p class="muted">Opened automatically when a check goes down, and closed when it recovers.</p>
+  </div>
+</header>
+
+<div class="tabs" role="tablist" aria-label="Filter incidents">
+  @for (option of filters; track option) {
+    <button
+      class="tab"
+      type="button"
+      role="tab"
+      [class.tab--active]="filter() === option"
+      [attr.aria-selected]="filter() === option"
+      (click)="filter.set(option)"
+    >
+      {{ option }}
+    </button>
+  }
+</div>
+
+@if (error(); as error) {
+  <div class="alert alert--danger" role="alert">{{ error }}</div>
+} @else if (loading() && incidents().length === 0) {
+  <p class="muted">Loading incidents…</p>
+} @else if (incidents().length === 0) {
+  <div class="empty">
+    <h2>{{ filter() === 'Open' ? 'All clear' : 'No incidents' }}</h2>
+    <p class="muted">
+      {{ filter() === 'Open' ? 'Nothing is down right now.' : 'Incidents appear here when a check goes down.' }}
+    </p>
+  </div>
+} @else {
+  <div class="card table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Status</th>
+          <th scope="col">Check</th>
+          <th scope="col">Started</th>
+          <th scope="col">Duration</th>
+          <th scope="col" class="hide-sm">Cause</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (incident of incidents(); track incident.id) {
+          <tr [class.row--down]="incident.status === 'Open'">
+            <td><app-status-badge [status]="incident.status" /></td>
+            <td>
+              <a class="link-strong" [routerLink]="['/checks', incident.checkId]">{{ incident.checkName }}</a>
+              <div class="muted small truncate">{{ incident.url }}</div>
+            </td>
+            <td>{{ incident.openedAt | relativeTime: clock.now() }}</td>
+            <td>
+              {{ durationSeconds(incident) | duration }}
+              @if (incident.resolution === 'Manual') {
+                <div class="muted small">resolved by hand</div>
+              }
+            </td>
+            <td class="hide-sm muted small truncate">
+              {{ incident.lastError ?? incident.failureCount + ' failures in a row' }}
+            </td>
+            <td class="actions">
+              @if (incident.status === 'Open') {
+                <button
+                  class="button button--small"
+                  type="button"
+                  [disabled]="resolvingId() === incident.id"
+                  (click)="resolve(incident)"
+                >
+                  Resolve
+                </button>
+              }
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

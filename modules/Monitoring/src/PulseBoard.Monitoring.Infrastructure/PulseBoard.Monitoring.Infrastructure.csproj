@@ -12,6 +12,8 @@
 
   <ItemGroup>
     <PackageReference Include="Aspire.Npgsql.EntityFrameworkCore.PostgreSQL" Version="13.6.5" />
+    <!-- Same version as ServiceDefaults; provides AddHttpClient and RemoveAllResilienceHandlers. -->
+    <PackageReference Include="Microsoft.Extensions.Http.Resilience" Version="10.10.0" />
   </ItemGroup>
 
 </Project>

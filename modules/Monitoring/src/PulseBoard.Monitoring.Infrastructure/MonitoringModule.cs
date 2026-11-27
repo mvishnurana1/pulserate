@@ -7,7 +7,9 @@ using Microsoft.Extensions.Hosting;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Infrastructure;
 using PulseBoard.Monitoring.Application;
 using PulseBoard.Monitoring.Application.Abstractions;
+using PulseBoard.Monitoring.Infrastructure.Outbox;
 using PulseBoard.Monitoring.Infrastructure.Persistence;
+using PulseBoard.Monitoring.Infrastructure.Probing;
 
 namespace PulseBoard.Monitoring.Infrastructure;
 
@@ -34,6 +36,28 @@ public static class MonitoringModule
 
         builder.Services.AddScoped<IMonitoringDbContext>(sp => sp.GetRequiredService<MonitoringDbContext>());
 
+        // The prober gets its own HttpClient with no resilience handler. Aspire's ServiceDefaults adds retries
+        // to every client by default, which would hide outages and skew response times.
+#pragma warning disable EXTEXP0001 // RemoveAllResilienceHandlers may be marked experimental.
+        builder.Services
+            .AddHttpClient<IEndpointProber, HttpEndpointProber>(client =>
+            {
+                client.Timeout = HttpEndpointProber.Timeout;
+                client.DefaultRequestHeaders.UserAgent.ParseAdd("PulseBoard/1.0 (+uptime monitor)");
+            })
+            .RemoveAllResilienceHandlers();
+#pragma warning restore EXTEXP0001
+
+        return builder;
+    }
+
+    /// <summary>
+    /// Publishes the module's outbox to in-process integration event handlers.
+    /// Run it in one host type only (the API), where the subscribers live.
+    /// </summary>
+    public static IHostApplicationBuilder AddMonitoringOutboxProcessor(this IHostApplicationBuilder builder)
+    {
+        builder.Services.AddHostedService<MonitoringOutboxProcessor>();
         return builder;
     }
 

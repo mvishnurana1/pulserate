@@ -106,6 +106,45 @@ namespace PulseBoard.Monitoring.Infrastructure.Persistence.Migrations
                     b.ToTable("CheckResults", "monitoring");
                 });
 
+            modelBuilder.Entity("PulseBoard.Monitoring.Infrastructure.Outbox.OutboxMessage", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityAlwaysColumn(b.Property<long>("Id"));
+
+                    b.Property<int>("Attempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("jsonb");
+
+                    b.Property<string>("LastError")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTimeOffset>("OccurredAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<DateTimeOffset?>("ProcessedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Id")
+                        .HasDatabaseName("IX_OutboxMessages_Unprocessed")
+                        .HasFilter("\"ProcessedAt\" IS NULL");
+
+                    b.ToTable("OutboxMessages", "monitoring");
+                });
+
             modelBuilder.Entity("PulseBoard.Monitoring.Domain.Checks.CheckResult", b =>
                 {
                     b.HasOne("PulseBoard.Monitoring.Domain.Checks.Check", null)

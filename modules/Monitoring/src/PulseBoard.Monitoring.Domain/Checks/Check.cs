@@ -116,6 +116,21 @@ public sealed class Check : Entity<Guid>
     public bool IsDue(DateTimeOffset now) => !IsPaused && NextCheckAt <= now;
 
     /// <summary>
+    /// Claims the check for one run, so the next scheduler tick doesn't queue it again while it's in flight.
+    /// If the run never reports back (the worker crashed), the check simply comes due again one interval later.
+    /// </summary>
+    public Result MarkScheduled(DateTimeOffset now)
+    {
+        if (IsPaused)
+        {
+            return CheckErrors.IsPaused;
+        }
+
+        NextCheckAt = now + Interval;
+        return Result.Success();
+    }
+
+    /// <summary>
     /// Applies the outcome of one HTTP check: updates the schedule and status, and raises
     /// <see cref="CheckWentDown"/> or <see cref="CheckRecovered"/> when the status flips.
     /// </summary>
@@ -131,6 +146,9 @@ public sealed class Check : Entity<Guid>
         var result = CheckResult.Create(Id, outcome, checkedAt);
         LastCheckedAt = checkedAt;
         NextCheckAt = checkedAt + Interval;
+
+        // Raised first so subscribers see the result before any status change it causes.
+        Raise(new CheckResultRecorded(Id, result.Id, outcome.IsSuccess, outcome.StatusCode, result.ResponseTimeMs, result.Error, checkedAt));
 
         if (outcome.IsSuccess)
         {

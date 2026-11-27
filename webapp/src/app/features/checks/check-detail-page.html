@@ -1,0 +1,103 @@
+<a class="back-link" routerLink="/">← All checks</a>
+
+@if (check(); as check) {
+  <header class="page-header">
+    <div>
+      <div class="title-row">
+        <h1>{{ check.name }}</h1>
+        <app-status-badge [status]="check.status" />
+      </div>
+      <a class="muted truncate" [href]="check.url" target="_blank" rel="noopener noreferrer">{{ check.url }}</a>
+      <p class="muted small">
+        Every {{ check.intervalSeconds | duration }} · down after {{ check.failureThreshold }} failures ·
+        last checked {{ check.lastCheckedAt | relativeTime: clock.now() }}
+        @if (check.status !== 'Paused') {
+          · next {{ check.nextCheckAt | relativeTime: clock.now() }}
+        }
+      </p>
+    </div>
+    <div class="actions">
+      <button class="button" type="button" [disabled]="busy()" (click)="togglePause()">
+        {{ check.status === 'Paused' ? 'Resume' : 'Pause' }}
+      </button>
+      <a class="button" [routerLink]="['/checks', check.id, 'edit']">Edit</a>
+      <button class="button button--danger-ghost" type="button" [disabled]="busy()" (click)="remove()">Delete</button>
+    </div>
+  </header>
+
+  @let s = stats();
+  <section class="stats" aria-label="Last {{ results().length }} results">
+    <div class="stat">
+      <span class="stat__label">Uptime</span>
+      <span class="stat__value">{{ s.uptimePercent !== null ? s.uptimePercent + '%' : '—' }}</span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">Average</span>
+      <span class="stat__value">{{ s.averageMs !== null ? s.averageMs : '—' }}<small>ms</small></span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">p95</span>
+      <span class="stat__value">{{ s.p95Ms !== null ? s.p95Ms : '—' }}<small>ms</small></span>
+    </div>
+    <div class="stat">
+      <span class="stat__label">Results shown</span>
+      <span class="stat__value">{{ results().length }}</span>
+    </div>
+  </section>
+
+  <section class="card chart-card">
+    <h2 class="card__title">Response time</h2>
+    <app-sparkline [values]="chartValues()" [failures]="chartFailures()" [width]="800" [height]="160" />
+    <p class="muted small">Oldest to newest. Red dots are failed checks.</p>
+  </section>
+
+  @if (s.lastError) {
+    <div class="alert alert--warning">Most recent error: {{ s.lastError }}</div>
+  }
+
+  <section class="card table-wrap">
+    <h2 class="card__title">Recent results</h2>
+    @if (loading()) {
+      <p class="muted">Loading results…</p>
+    } @else if (error(); as error) {
+      <div class="alert alert--danger" role="alert">{{ error }}</div>
+    } @else if (results().length === 0) {
+      <p class="muted">No results yet. The first check runs within about 15 seconds.</p>
+    } @else {
+      <table class="table">
+        <thead>
+          <tr>
+            <th scope="col">Result</th>
+            <th scope="col">Status code</th>
+            <th scope="col">Response time</th>
+            <th scope="col">When</th>
+            <th scope="col" class="hide-sm">Error</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (result of results(); track result.id) {
+            <tr>
+              <td>
+                <span class="pill" [class.pill--success]="result.isSuccess" [class.pill--danger]="!result.isSuccess">
+                  {{ result.isSuccess ? 'OK' : 'Failed' }}
+                </span>
+              </td>
+              <td>{{ result.statusCode ?? '—' }}</td>
+              <td>{{ result.responseTimeMs }} ms</td>
+              <td>{{ result.checkedAt | relativeTime: clock.now() }}</td>
+              <td class="hide-sm muted small truncate">{{ result.error ?? '' }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </section>
+} @else if (loading()) {
+  <p class="muted">Loading…</p>
+} @else {
+  <div class="empty">
+    <h2>Check not found</h2>
+    <p class="muted">It may have been deleted.</p>
+    <a class="button" routerLink="/">Back to checks</a>
+  </div>
+}

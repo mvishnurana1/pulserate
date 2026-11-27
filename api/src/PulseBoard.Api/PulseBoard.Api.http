@@ -47,8 +47,19 @@ POST {{api}}/api/checks/{{checkId}}/pause
 ###
 POST {{api}}/api/checks/{{checkId}}/resume
 
-### History (empty until the Functions slice records results)
+### History (fills up as the Functions app runs the check)
 GET {{api}}/api/checks/{{checkId}}/results?take=20
 
 ### Delete
 DELETE {{api}}/api/checks/{{checkId}}
+
+### Open incidents
+GET {{api}}/api/incidents?status=open
+Accept: application/json
+
+### All incidents
+GET {{api}}/api/incidents
+Accept: application/json
+
+### Invalid filter (expect 400 "Incident.InvalidStatusFilter")
+GET {{api}}/api/incidents?status=sideways

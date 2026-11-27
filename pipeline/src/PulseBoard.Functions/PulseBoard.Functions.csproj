@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk">
+<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>net10.0</TargetFramework>
@@ -24,6 +24,11 @@
     <ProjectReference Include="..\..\..\modules\Incidents\src\PulseBoard.Incidents.Application\PulseBoard.Incidents.Application.csproj" />
     <ProjectReference Include="..\..\..\modules\Incidents\src\PulseBoard.Incidents.Infrastructure\PulseBoard.Incidents.Infrastructure.csproj" />
     <ProjectReference Include="..\..\..\aspire\PulseBoard.ServiceDefaults\PulseBoard.ServiceDefaults.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Timer" Version="4.*" />
+    <PackageReference Include="Microsoft.Azure.Functions.Worker.Extensions.Storage.Queues" Version="5.*" />
   </ItemGroup>
 
 </Project>

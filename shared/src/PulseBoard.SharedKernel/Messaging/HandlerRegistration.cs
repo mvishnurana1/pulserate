@@ -1,14 +1,20 @@
 using System.Reflection;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace PulseBoard.SharedKernel.Messaging;
 
 public static class HandlerRegistration
 {
-    private static readonly Type[] HandlerInterfaces = [typeof(ICommandHandler<,>), typeof(IQueryHandler<,>)];
+    private static readonly Type[] HandlerInterfaces =
+    [
+        typeof(ICommandHandler<,>),
+        typeof(IQueryHandler<,>),
+        typeof(IIntegrationEventHandler<>),
+    ];
 
     /// <summary>
-    /// Registers every command and query handler in <paramref name="assembly"/> as a scoped service.
+    /// Registers every command, query and integration event handler in <paramref name="assembly"/> as a scoped service.
     /// Handlers can stay internal to their module; callers depend only on the handler interfaces.
     /// </summary>
     public static IServiceCollection AddHandlersFromAssembly(this IServiceCollection services, Assembly assembly)
@@ -24,6 +30,7 @@ public static class HandlerRegistration
             services.AddScoped(service, implementation);
         }
 
+        services.TryAddScoped<IntegrationEventDispatcher>();
         return services;
     }
 }

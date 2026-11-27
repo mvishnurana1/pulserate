@@ -1,0 +1,112 @@
+<header class="page-header">
+  <div>
+    <h1>Checks</h1>
+    <p class="muted">Endpoints PulseBoard calls on a schedule. Status and response times update live.</p>
+  </div>
+  <a class="button button--primary" routerLink="/checks/new">Add check</a>
+</header>
+
+@let summary = store.summary();
+<section class="stats" aria-label="Summary">
+  <div class="stat">
+    <span class="stat__label">Checks</span>
+    <span class="stat__value">{{ summary.total }}</span>
+  </div>
+  <div class="stat stat--success">
+    <span class="stat__label">Up</span>
+    <span class="stat__value">{{ summary.up }}</span>
+  </div>
+  <div class="stat stat--danger">
+    <span class="stat__label">Down</span>
+    <span class="stat__value">{{ summary.down }}</span>
+  </div>
+  <div class="stat">
+    <span class="stat__label">Paused</span>
+    <span class="stat__value">{{ summary.paused }}</span>
+  </div>
+  <div class="stat">
+    <span class="stat__label">Avg response</span>
+    <span class="stat__value">
+      @if (summary.averageResponseMs !== null) {
+        {{ summary.averageResponseMs }}<small>ms</small>
+      } @else {
+        —
+      }
+    </span>
+  </div>
+</section>
+
+@if (store.error(); as error) {
+  <div class="alert alert--danger" role="alert">
+    {{ error }}
+    <button class="button button--small" type="button" (click)="store.load()">Retry</button>
+  </div>
+}
+
+@if (store.loading() && store.checks().length === 0) {
+  <p class="muted">Loading checks…</p>
+} @else if (store.checks().length === 0 && !store.error()) {
+  <div class="empty">
+    <h2>No checks yet</h2>
+    <p class="muted">Add an endpoint and PulseBoard will start checking it within seconds.</p>
+    <a class="button button--primary" routerLink="/checks/new">Add your first check</a>
+  </div>
+} @else {
+  <div class="card table-wrap">
+    <table class="table">
+      <thead>
+        <tr>
+          <th scope="col">Status</th>
+          <th scope="col">Name</th>
+          <th scope="col" class="hide-sm">Response time</th>
+          <th scope="col" class="hide-sm">Interval</th>
+          <th scope="col">Last checked</th>
+          <th scope="col"><span class="visually-hidden">Actions</span></th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (check of store.checks(); track check.id) {
+          @let history = store.latency()[check.id] ?? [];
+          <tr [class.row--down]="check.status === 'Down'">
+            <td><app-status-badge [status]="check.status" /></td>
+            <td>
+              <a class="link-strong" [routerLink]="['/checks', check.id]">{{ check.name }}</a>
+              <div class="muted small truncate">{{ check.url }}</div>
+              @if (check.consecutiveFailures > 0 && check.status !== 'Down') {
+                <div class="warning small">{{ check.consecutiveFailures }} of {{ check.failureThreshold }} failures</div>
+              }
+            </td>
+            <td class="hide-sm">
+              <div class="latency">
+                <app-sparkline [values]="history" />
+                <span class="latency__value">{{ history.length ? history.at(-1) + ' ms' : '—' }}</span>
+              </div>
+            </td>
+            <td class="hide-sm">{{ check.intervalSeconds | duration }}</td>
+            <td>{{ check.lastCheckedAt | relativeTime: clock.now() }}</td>
+            <td class="actions">
+              <button
+                class="button button--small"
+                type="button"
+                [disabled]="busyId() === check.id"
+                (click)="togglePause(check)"
+              >
+                {{ check.status === 'Paused' ? 'Resume' : 'Pause' }}
+              </button>
+              <a class="button button--small" [routerLink]="['/checks', check.id, 'edit']">Edit</a>
+              <button
+                class="button button--small button--danger-ghost"
+                type="button"
+                [disabled]="busyId() === check.id"
+                (click)="remove(check)"
+                [attr.aria-label]="'Delete ' + check.name"
+              >
+                Delete
+              </button>
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+}

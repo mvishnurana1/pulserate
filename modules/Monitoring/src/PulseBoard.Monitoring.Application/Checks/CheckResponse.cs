@@ -33,4 +33,13 @@ public sealed record CheckResultResponse(
     bool IsSuccess,
     int? StatusCode,
     int ResponseTimeMs,
-    string? Error);
+    string? Error)
+{
+    internal static CheckResultResponse From(CheckResult result) => new(
+        result.Id,
+        result.CheckedAt,
+        result.IsSuccess,
+        result.StatusCode,
+        result.ResponseTimeMs,
+        result.Error);
+}
